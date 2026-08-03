@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Manage Applications{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container">
+        <h1 class="fw-bold mb-1"><i class="fas fa-file-invoice-dollar text-primary me-2"></i>Manage Applications</h1>
+        <p class="text-muted">Review verification files, download salary slips, and approve credit portfolios.</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <!-- Filter Block -->
+        <div class="card glass-card p-4 mb-4">
+            <form method="GET" action="{{ url_for('admin.loans') }}" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="search" class="form-label small fw-bold">Search Application</label>
+                    <input type="text" class="form-control" id="search" name="search" value="{{ search }}" placeholder="e.g. Name, Email, PAN">
+                </div>
+
+                <div class="col-md-3">
+                    <label for="status" class="form-label small fw-bold">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All Statuses</option>
+                        <option value="Pending" {% if status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="In Review" {% if status == 'In Review' %}selected{% endif %}>In Review</option>
+                        <option value="Approved" {% if status == 'Approved' %}selected{% endif %}>Approved</option>
+                        <option value="Rejected" {% if status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="loan_type_id" class="form-label small fw-bold">Loan Product</label>
+                    <select class="form-select" id="loan_type_id" name="loan_type_id">
+                        <option value="">All Products</option>
+                        {% for lt in loan_types %}
+                            <option value="{{ lt.id }}" {% if selected_loan_type == lt.id %}selected{% endif %}>{{ lt.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Portfolios Table -->
+        <div class="card glass-card p-4">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Applicant</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Tenure</th>
+                            <th>Status</th>
+                            <th>Submission Date</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if applications %}
+                            {% for app in applications %}
+                                <tr>
+                                    <td>#{{ app.id }}</td>
+                                    <td>
+                                        <span class="fw-bold text-main">{{ app.full_name }}</span>
+                                        <small class="text-muted d-block">{{ app.email }}</small>
+                                    </td>
+                                    <td>{{ app.loan_type.name }}</td>
+                                    <td>INR {{ '{:,.2f}'.format(app.loan_amount) }}</td>
+                                    <td>{{ app.tenure_months }} Mo</td>
+                                    <td>
+                                        <span class="badge {% if app.status == 'Approved' %}bg-success{% elif app.status == 'Rejected' %}bg-danger{% elif app.status == 'In Review' %}bg-info{% else %}bg-warning{% endif %}">
+                                            {{ app.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ app.applied_at.strftime('%Y-%m-%d') }}</td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('admin.review_application', app_id=app.id) }}" class="btn btn-sm btn-primary">Review</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">No applications found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

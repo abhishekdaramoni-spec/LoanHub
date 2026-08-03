@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Your Dream Starts With the Right Loan{% endblock %}
+
+{% block content %}
+<!-- -------------------------------------------------------------
+-- HERO BANNER
+------------------------------------------------------------- -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 reveal">
+                <span class="badge bg-primary-light text-primary border border-primary px-3 py-2 rounded-pill mb-3">
+                    <i class="fas fa-percent me-1"></i> Lower Interest Rates Starting @ 6.5%
+                </span>
+                <h1 class="hero-title text-main">
+                    Your Dream Starts With <span class="text-gradient">The Right Loan</span>
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Unlock financial freedom with LoanSphere. Whether it's a new home, commercial expansion, education, or personal needs—we offer quick approvals and custom repayment schedules.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('main.apply') }}" class="btn btn-primary btn-lg">
+                        Apply Now <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                    <a href="{{ url_for('main.calculator') }}" class="btn btn-outline-secondary btn-lg">
+                        Calculate EMI
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center reveal">
+                <!-- Large Banking Illustration (Using FontAwesome and modern cards stack layout) -->
+                <div class="position-relative d-inline-block py-5">
+                    <div class="glass-panel p-4 position-absolute top-0 start-0 translate-middle shadow border-light" style="width: 160px; transform: translate(-10%, -20%) rotate(-10deg) !important; z-index: 2;">
+                        <i class="fas fa-shield-alt text-success fs-2 mb-2"></i>
+                        <h6 class="fw-bold mb-0">100% Secure</h6>
+                        <small class="text-muted">Bank-grade safety</small>
+                    </div>
+                    <div class="glass-panel p-4 position-absolute bottom-0 end-0 translate-middle shadow border-light" style="width: 180px; transform: translate(10%, 20%) rotate(5deg) !important; z-index: 2;">
+                        <i class="fas fa-bolt text-warning fs-2 mb-2"></i>
+                        <h6 class="fw-bold mb-0">Instant Approval</h6>
+                        <small class="text-muted">Within 24 Hours</small>
+                    </div>
+                    <div class="glass-card p-5 shadow-lg border-light" style="width: 320px; height: 320px; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle, var(--bg-card) 0%, rgba(var(--primary-rgb), 0.1) 100%);">
+                        <i class="fas fa-wallet text-primary" style="font-size: 8rem; filter: drop-shadow(0px 8px 16px rgba(var(--primary-rgb), 0.2));"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- -------------------------------------------------------------
+-- LATEST LOAN OFFERS
+------------------------------------------------------------- -->
+<section class="py-5 bg-light-app">
+    <div class="container">
+        <div class="text-center mb-5 reveal">
+            <h2 class="fw-bold">Explore Our <span class="text-gradient">Loan Offers</span></h2>
+            <p class="text-muted">Find options that match your financial requirements with low processing fees.</p>
+        </div>
+        
+        <div class="row g-4 justify-content-center">
+            {% for loan in loans %}
+                <div class="col-lg-3 col-md-6 reveal">
+                    <div class="card glass-card h-100 p-4 d-flex flex-column">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="p-3 rounded-3 bg-primary-light text-primary" style="background-color: rgba(var(--primary-rgb), 0.1);">
+                                <i class="fas {{ loan.icon_class }} fs-4"></i>
+                            </span>
+                            <span class="badge bg-secondary-light text-secondary border border-secondary px-2 py-1 rounded">
+                                {{ loan.category }}
+                            </span>
+                        </div>
+                        <h5 class="fw-bold mb-2">{{ loan.name }}</h5>
+                        <p class="text-muted small flex-grow-1">{{ loan.description[:100] }}...</p>
+                        
+                        <div class="border-top pt-3 mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted small">Interest Rate:</span>
+                                <span class="fw-semibold text-main">{{ loan.min_interest_rate }}% - {{ loan.max_interest_rate }}%</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted small">Max Amount:</span>
+                                <span class="fw-semibold text-main">INR {{ '{:,.0f}'.format(loan.max_amount) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted small">Tenure:</span>
+                                <span class="fw-semibold text-main">Up to {{ loan.max_tenure_months }} mo</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('main.loan_detail', slug=loan.slug) }}" class="btn btn-sm btn-outline-primary w-100">Details</a>
+                            <a href="{{ url_for('main.apply') }}" class="btn btn-sm btn-primary w-100">Apply</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{{ url_for('main.loans') }}" class="btn btn-outline-primary">View All Loan Products</a>
+        </div>
+    </div>
+</section>
+
+<!-- -------------------------------------------------------------
+-- WHY CHOOSE LOANSPHERE
+------------------------------------------------------------- -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 text-center reveal">
+                <i class="fas fa-hand-holding-usd text-gradient" style="font-size: 15rem; filter: drop-shadow(0px 8px 16px rgba(var(--secondary-rgb), 0.2));"></i>
+            </div>
+            <div class="col-lg-6 reveal">
+                <h2 class="fw-bold mb-4">Why Smart Borrowers <span class="text-gradient">Choose Us</span></h2>
+                <p class="text-muted mb-4">LoanSphere is built with standard transparency guidelines, providing quick approvals and personalized services.</p>
+                
+                <div class="d-flex gap-3 mb-4">
+                    <div class="p-3 rounded-circle bg-success-light text-success align-self-start" style="background-color: rgba(var(--secondary-rgb), 0.1);">
+                        <i class="fas fa-clock fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Fast Documentation & Approval</h5>
+                        <p class="text-muted mb-0">No more long branch queues. Upload scanned cards and salary slips for instant verification and quick turnaround times.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 mb-4">
+                    <div class="p-3 rounded-circle bg-primary-light text-primary align-self-start" style="background-color: rgba(var(--primary-rgb), 0.1);">
+                        <i class="fas fa-search-dollar fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Transparent Rates, Zero Hidden Fees</h5>
+                        <p class="text-muted mb-0">Our calculations and schedules are displayed upfront, giving you complete clarity on EMIs, interest rates, and loan processing fees.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <div class="p-3 rounded-circle bg-warning-light text-warning align-self-start" style="background-color: rgba(255, 193, 7, 0.1);">
+                        <i class="fas fa-users-cog fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold">Customizable Payment Tenure</h5>
+                        <p class="text-muted mb-0">Choose tenure options starting from 3 months up to 30 years to suit your regular monthly budget outflow.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- -------------------------------------------------------------
+-- STATISTICS SECTION
+------------------------------------------------------------- -->
+<section class="py-5 statistics-section bg-primary text-white position-relative overflow-hidden">
+    <!-- background decor circles -->
+    <div class="position-absolute rounded-circle bg-white" style="width: 300px; height: 300px; opacity: 0.03; top: -100px; left: -100px;"></div>
+    <div class="position-absolute rounded-circle bg-white" style="width: 300px; height: 300px; opacity: 0.03; bottom: -100px; right: -100px;"></div>
+
+    <div class="container position-relative">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-white">Trusted by 1 Million+ Customers</h2>
+            <p class="text-white-50">Expanding our reach globally with simple finance options.</p>
+        </div>
+        
+        <div class="row g-4 text-center">
+            <div class="col-md-3 col-6">
+                <div class="counter-box">
+                    <i class="fas fa-users-viewfinder"></i>
+                    <h3 class="counter-value" data-target="{{ stats.customers }}">0</h3>
+                    <p class="text-white-50 small mb-0">Happy Customers</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="counter-box">
+                    <i class="fas fa-handshake"></i>
+                    <h3 class="counter-value" data-target="{{ stats.disbursed }}">0</h3>
+                    <p class="text-white-50 small mb-0">Loans Disbursed</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="counter-box">
+                    <i class="fas fa-code-branch"></i>
+                    <h3 class="counter-value" data-target="{{ stats.branches }}">0</h3>
+                    <p class="text-white-50 small mb-0">Branches Nationwide</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="counter-box">
+                    <i class="fas fa-star-half-stroke"></i>
+                    <h3 class="counter-value" data-target="{{ stats.rating }}">0</h3>
+                    <p class="text-white-50 small mb-0">Customer Rating</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- -------------------------------------------------------------
+-- BANK PARTNERS
+------------------------------------------------------------- -->
+<section class="py-5">
+    <div class="container text-center reveal">
+        <h5 class="text-muted fw-semibold mb-4 text-uppercase">Our Authorized Financial Partners</h5>
+        <div class="d-flex flex-wrap justify-content-center gap-5 align-items-center opacity-75">
+            {% for partner in partners %}
+                <span class="fs-4 fw-bold text-muted border border-2 border-dashed px-3 py-2 rounded">{{ partner }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- -------------------------------------------------------------
+-- TESTIMONIAL CAROUSEL
+------------------------------------------------------------- -->
+<section class="py-5 bg-light-app">
+    <div class="container">
+        <div class="text-center mb-5 reveal">
+            <h2 class="fw-bold">What Our <span class="text-gradient">Customers Say</span></h2>
+            <p class="text-muted">Stories of dreams fulfilled by LoanSphere.</p>
+        </div>
+        
+        <div id="testimonialCarousel" class="carousel slide reveal" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 text-center">
+                            <div class="glass-card p-5">
+                                <i class="fas fa-quote-left text-primary fs-1 mb-3"></i>
+                                <p class="lead mb-4">"The Home Loan approval was extremely fast. I uploaded all salary slips and my property deed, and in just 3 days the bank cleared my approval receipt. Transparent EMIs, highly recommended!"</p>
+                                <h5 class="fw-bold mb-0">Vikram Malhotra</h5>
+                                <small class="text-muted">Home Loan Customer, Bengaluru</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 text-center">
+                            <div class="glass-card p-5">
+                                <i class="fas fa-quote-left text-primary fs-1 mb-3"></i>
+                                <p class="lead mb-4">"Secured a Business Loan of 15 Lakhs for expanding my tooling setup. The interest rate was very competitive and the team was supportive throughout the document check phase."</p>
+                                <h5 class="fw-bold mb-0">Nisha Deshmukh</h5>
+                                <small class="text-muted">SME Owner, Pune</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true" style="filter: invert(1);"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true" style="filter: invert(1);"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- -------------------------------------------------------------
+-- LATEST NEWS & GUIDES
+------------------------------------------------------------- -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5 reveal">
+            <h2 class="fw-bold">Latest Financial <span class="text-gradient">Insights</span></h2>
+            <p class="text-muted">Stay informed on loan management, interest curves, and budgeting guides.</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4 reveal">
+                <div class="card glass-card h-100 overflow-hidden border-light">
+                    <div class="p-5 text-center bg-primary text-white">
+                        <i class="fas fa-coins fs-1"></i>
+                    </div>
+                    <div class="card-body p-4">
+                        <span class="text-muted small">August 1, 2026</span>
+                        <h5 class="fw-bold my-2">5 Smart Ways to Improve Your Credit Score</h5>
+                        <p class="text-muted small">Learn how quick bill payments, monitoring credit usage and clean repayment timelines help you qualify for lower loan rates.</p>
+                        <a href="#" class="text-primary text-decoration-none fw-semibold">Read Article <i class="fas fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 reveal">
+                <div class="card glass-card h-100 overflow-hidden border-light">
+                    <div class="p-5 text-center bg-secondary text-white">
+                        <i class="fas fa-piggy-bank fs-1"></i>
+                    </div>
+                    <div class="card-body p-4">
+                        <span class="text-muted small">July 25, 2026</span>
+                        <h5 class="fw-bold my-2">Understanding Fixed vs Floating Interest Rates</h5>
+                        <p class="text-muted small">Choosing between fixed and floating rates can save lakhs over long tenures. We break down the implications for home buyers.</p>
+                        <a href="#" class="text-primary text-decoration-none fw-semibold">Read Article <i class="fas fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 reveal">
+                <div class="card glass-card h-100 overflow-hidden border-light">
+                    <div class="p-5 text-center bg-info text-white">
+                        <i class="fas fa-business-time fs-1"></i>
+                    </div>
+                    <div class="card-body p-4">
+                        <span class="text-muted small">July 18, 2026</span>
+                        <h5 class="fw-bold my-2">Guide to Government Subsidized MSME Schemes</h5>
+                        <p class="text-muted small">A detailed checklist on how small businesses can leverage MSME status to secure lower collateral interest margins.</p>
+                        <a href="#" class="text-primary text-decoration-none fw-semibold">Read Article <i class="fas fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

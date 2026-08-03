@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Manage Interest Rates{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container">
+        <h1 class="fw-bold mb-1"><i class="fas fa-percentage text-primary me-2"></i>Manage Interest Rates</h1>
+        <p class="text-muted">Set annual percentages and active/inactive ranges for loan products.</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Add Rate Column -->
+            <div class="col-lg-4">
+                <div class="card glass-card p-4">
+                    <h5 class="fw-bold mb-4">Add Interest Rate</h5>
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.loan_type_id.label(class="form-label fw-semibold small") }}
+                            {{ form.loan_type_id(class="form-select" + (" is-invalid" if form.loan_type_id.errors else "")) }}
+                            {% for error in form.loan_type_id.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.tenure_months.label(class="form-label fw-semibold small") }}
+                            {{ form.tenure_months(class="form-control" + (" is-invalid" if form.tenure_months.errors else ""), placeholder="e.g. 36") }}
+                            {% for error in form.tenure_months.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.rate_pct.label(class="form-label fw-semibold small") }}
+                            {{ form.rate_pct(class="form-control" + (" is-invalid" if form.rate_pct.errors else ""), placeholder="e.g. 9.5") }}
+                            {% for error in form.rate_pct.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form.status.label(class="form-label fw-semibold small") }}
+                            {{ form.status(class="form-select" + (" is-invalid" if form.status.errors else "")) }}
+                            {% for error in form.status.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Save Interest Rate</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Rates Table Column -->
+            <div class="col-lg-8">
+                <div class="card glass-card p-4">
+                    <h5 class="fw-bold mb-4">Configured Interest Tiers</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Tenure</th>
+                                    <th>Rate (% p.a.)</th>
+                                    <th>Effective Date</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if rates %}
+                                    {% for rate in rates %}
+                                        <tr>
+                                            <td><strong>{{ rate.loan_type.name }}</strong></td>
+                                            <td>{{ rate.tenure_months }} Mo</td>
+                                            <td class="text-primary fw-bold">{{ rate.rate_pct }}%</td>
+                                            <td>{{ rate.effective_from.strftime('%Y-%m-%d') }}</td>
+                                            <td>
+                                                <span class="badge status-badge {% if rate.status == 'Active' %}bg-success{% else %}bg-secondary{% endif %}" id="status_{{ rate.id }}">
+                                                    {{ rate.status }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <button class="btn btn-sm btn-outline-secondary toggle-status-btn" data-id="{{ rate.id }}">
+                                                    Toggle Active
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">No interest tiers defined.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtns = document.querySelectorAll('.toggle-status-btn');
+        const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+        
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const rateId = btn.getAttribute('data-id');
+                const token = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
+                fetch(`/admin/rates/${rateId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': token
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const badge = document.getElementById(`status_${rateId}`);
+                        badge.innerText = data.new_status;
+                        if (data.new_status === 'Active') {
+                            badge.className = 'badge status-badge bg-success';
+                        } else {
+                            badge.className = 'badge status-badge bg-secondary';
+                        }
+                        window.showToast('Interest rate status toggled.', 'success');
+                    }
+                })
+                .catch(err => console.error(err));
+            });
+        });
+    });
+</script>
+{% endblock %}

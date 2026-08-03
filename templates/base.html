@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}LoanSphere | Modern Banking & Loans{% endblock %}</title>
+    
+    <!-- Meta Descriptions for SEO -->
+    <meta name="description" content="LoanSphere is a premium digital banking platform providing instant loans, personal loan services, and transparent eligibility checks with interactive calculators.">
+    
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- -------------------------------------------------------------
+    -- NAVBAR HEADER
+    ------------------------------------------------------------- -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('main.index') }}">
+                <i class="fas fa-compass fs-3 text-gradient"></i>
+                <span>LoanSphere</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}" href="{{ url_for('main.about') }}">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.loans' or request.endpoint == 'main.loan_detail' %}active{% endif %}" href="{{ url_for('main.loans') }}">Loans</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.calculator' %}active{% endif %}" href="{{ url_for('main.calculator') }}">EMI Calculator</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.eligibility' %}active{% endif %}" href="{{ url_for('main.eligibility') }}">Eligibility</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.compare' %}active{% endif %}" href="{{ url_for('main.compare') }}">Compare</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.rates' %}active{% endif %}" href="{{ url_for('main.rates') }}">Rates</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.faqs' %}active{% endif %}" href="{{ url_for('main.faqs') }}">FAQs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}" href="{{ url_for('main.contact') }}">Contact</a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <!-- Theme Toggle button -->
+                    <button class="btn btn-link nav-link p-2" id="theme-toggle" aria-label="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                            <!-- Admin Dropdown -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-primary dropdown-toggle d-flex align-items-center gap-2" type="button" id="adminDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-shield"></i> Admin Panel
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end glass-panel" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}"><i class="fas fa-chart-line me-2"></i>Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('admin.loans') }}"><i class="fas fa-file-invoice-dollar me-2"></i>Applications</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('admin.users') }}"><i class="fas fa-users me-2"></i>Manage Users</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('admin.rates') }}"><i class="fas fa-percentage me-2"></i>Manage Rates</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('admin.messages') }}"><i class="fas fa-envelope me-2"></i>Support Inbox</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                                </ul>
+                            </div>
+                        {% else %}
+                            <!-- Notifications Bell -->
+                            <div class="dropdown">
+                                <button class="btn btn-link nav-link position-relative p-2" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-bell"></i>
+                                    {% if unread_notifs_count > 0 %}
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{ unread_notifs_count }}
+                                        </span>
+                                    {% endif %}
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end glass-panel p-2" style="width: 320px;" aria-labelledby="notifDropdown">
+                                    <li class="dropdown-header border-bottom pb-2">Notifications</li>
+                                    {% if recent_notifications %}
+                                        {% for notif in recent_notifications %}
+                                            <li class="p-2 border-bottom">
+                                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                                    <small class="d-block text-main {% if not notif.is_read %}fw-semibold{% endif %}">{{ notif.message }}</small>
+                                                    {% if not notif.is_read %}
+                                                        <a href="#" class="notification-item-dismiss text-secondary small" data-id="{{ notif.id }}"><i class="fas fa-check"></i></a>
+                                                    {% endif %}
+                                                </div>
+                                                <span class="text-muted d-block small mt-1" style="font-size: 0.75rem;">{{ notif.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                            </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <li class="p-3 text-center text-muted">No new notifications.</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+
+                            <!-- User Profile Options -->
+                            <div class="dropdown">
+                                <button class="btn btn-link nav-link d-flex align-items-center gap-2 p-1" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="{% if current_user.photo.startswith('default_') %}{{ url_for('static', filename='images/' + current_user.photo) if false else 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }}{% else %}{{ url_for('static', filename='uploads/' + current_user.photo) }}{% endif %}" alt="Profile" class="rounded-circle" width="32" height="32" style="object-fit: cover;">
+                                    <span class="d-none d-md-inline">{{ current_user.name.split(' ')[0] }}</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end glass-panel" aria-labelledby="userMenu">
+                                    <li><a class="dropdown-item" href="{{ url_for('main.dashboard') }}"><i class="fas fa-th-large me-2"></i>My Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}"><i class="fas fa-user-cog me-2"></i>Edit Profile</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('main.my_applications') }}"><i class="fas fa-folder-open me-2"></i>Track Applications</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <!-- Guest Actions -->
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">Login</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- -------------------------------------------------------------
+    -- FLASH MESSAGES & TOASTS
+    ------------------------------------------------------------- -->
+    <div class="toast-container-custom"></div>
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show glass-panel shadow-sm" role="alert">
+                        <div class="d-flex align-items-center gap-2">
+                            {% if category == 'success' %}
+                                <i class="fas fa-check-circle text-success fs-5"></i>
+                            {% elif category == 'danger' or category == 'error' %}
+                                <i class="fas fa-times-circle text-danger fs-5"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fas fa-exclamation-triangle text-warning fs-5"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle text-info fs-5"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- -------------------------------------------------------------
+    -- MAIN PAGE CONTENT
+    ------------------------------------------------------------- -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- -------------------------------------------------------------
+    -- FOOTER
+    ------------------------------------------------------------- -->
+    <footer>
+        <div class="container">
+            <div class="row g-4 justify-content-between">
+                <div class="col-lg-4 col-md-6">
+                    <a class="d-flex align-items-center gap-2 mb-3 text-decoration-none" href="{{ url_for('main.index') }}">
+                        <i class="fas fa-compass fs-3 text-gradient"></i>
+                        <span class="fs-4 fw-bold text-main">LoanSphere</span>
+                    </a>
+                    <p class="text-muted">Secure your dreams with our transparent interest structures, rapid approvals, and robust, user-first digital lending services.</p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle p-2" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle p-2" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle p-2" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle p-2" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold mb-3">Our Loans</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/loans/personal-loan" class="text-muted text-decoration-none small d-block mb-2">Personal Loans</a></li>
+                        <li><a href="/loans/home-loan" class="text-muted text-decoration-none small d-block mb-2">Home Loans</a></li>
+                        <li><a href="/loans/car-loan" class="text-muted text-decoration-none small d-block mb-2">Car Loans</a></li>
+                        <li><a href="/loans/business-loan" class="text-muted text-decoration-none small d-block mb-2">Business Loans</a></li>
+                        <li><a href="/loans/education-loan" class="text-muted text-decoration-none small d-block mb-2">Education Loans</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('main.calculator') }}" class="text-muted text-decoration-none small d-block mb-2">EMI Calculator</a></li>
+                        <li><a href="{{ url_for('main.eligibility') }}" class="text-muted text-decoration-none small d-block mb-2">Eligibility Checker</a></li>
+                        <li><a href="{{ url_for('main.compare') }}" class="text-muted text-decoration-none small d-block mb-2">Compare Loans</a></li>
+                        <li><a href="{{ url_for('main.rates') }}" class="text-muted text-decoration-none small d-block mb-2">Interest Rates</a></li>
+                        <li><a href="{{ url_for('main.faqs') }}" class="text-muted text-decoration-none small d-block mb-2">FAQs</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3">Newsletter</h6>
+                    <p class="text-muted small">Stay updated on rate cuts and new banking offers.</p>
+                    <form class="input-group mb-3">
+                        <input type="email" class="form-control" placeholder="Email address" required aria-label="Newsletter email">
+                        <button class="btn btn-primary" type="submit" aria-label="Subscribe"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+            
+            <hr class="my-4" style="border-color: var(--border-color);">
+            
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <p class="mb-0 text-muted small">&copy; 2026 LoanSphere Bank. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-muted text-decoration-none small">Privacy Policy</a>
+                    <a href="#" class="text-muted text-decoration-none small">Terms of Service</a>
+                    <a href="#" class="text-muted text-decoration-none small">Security</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

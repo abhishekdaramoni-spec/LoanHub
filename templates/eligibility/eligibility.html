@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Eligibility Checker{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-3"><span class="text-gradient">Loan Eligibility Checker</span></h1>
+        <p class="lead text-muted">Test your eligibility and estimate your loan limits before document filing.</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <div class="row g-4 justify-content-center">
+            <!-- Input Form Card -->
+            <div class="col-lg-6">
+                <div class="card glass-card p-4 h-100">
+                    <h4 class="fw-bold mb-4">Check Your Credit Eligibility</h4>
+                    <form id="eligibilityForm">
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="age" class="form-label fw-semibold">Age (Years)</label>
+                                <input type="number" class="form-control" id="age" min="18" max="75" value="30" required>
+                                <small class="text-muted">Must be between 21 and 65.</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="employment" class="form-label fw-semibold">Employment Status</label>
+                                <select class="form-select" id="employment" required>
+                                    <option value="Salaried">Salaried Employee</option>
+                                    <option value="Self Employed Business">Self Employed (Business)</option>
+                                    <option value="Self Employed Professional">Self Employed (Professional)</option>
+                                    <option value="Agriculture">Agriculture / Farmer</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label for="income" class="form-label fw-semibold">Net Monthly Income (INR)</label>
+                                <input type="number" class="form-control" id="income" min="5000" value="50000" required>
+                                <small class="text-muted">Your take-home cash salary/business income.</small>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <label for="credit_score" class="form-label fw-semibold">Credit Score (CIBIL)</label>
+                                    <span class="fw-bold text-primary" id="creditScoreVal">720</span>
+                                </div>
+                                <input type="range" class="form-range" id="credit_score" min="300" max="900" step="5" value="720">
+                                <small class="text-muted d-block">Drag to simulate different credit profiles.</small>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <label for="existing_emi" class="form-label fw-semibold">Existing Monthly EMIs (INR)</label>
+                                <input type="number" class="form-control" id="existing_emi" min="0" value="0" required>
+                                <small class="text-muted">Enter sum of all active loans/credit card EMIs.</small>
+                            </div>
+                            
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100 py-2 fs-6">
+                                    <i class="fas fa-calculator me-2"></i>Evaluate My Eligibility
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Output Results Card -->
+            <div class="col-lg-6">
+                <!-- Result container loaded by JS -->
+                <div class="card glass-card p-4 h-100 text-center" id="eligibilityResult" style="display: none;">
+                    <div class="card-body">
+                        <div id="eligibilityBadge" class="badge p-3 fs-5 mb-3">CONGRATULATIONS</div>
+                        <p class="lead text-muted mb-4" id="eligibilityReason"></p>
+                        
+                        <div id="eligibilityDetails">
+                            <!-- Dynamic specifications loaded here -->
+                        </div>
+                        
+                        <div id="recommendedLoansList" class="mt-4">
+                            <!-- Dynamic loan recommendations loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Initial placeholder info -->
+                <div class="card glass-card p-4 h-100 d-flex flex-column justify-content-center text-center align-items-center border-dashed" id="eligibilityPlaceholder">
+                    <i class="fas fa-shield-halved text-muted mb-3" style="font-size: 5rem; opacity: 0.5;"></i>
+                    <h4 class="fw-bold text-muted">Evaluation Summary</h4>
+                    <p class="text-muted max-width-350">Fill the credit questionnaire to see your loan potential limit and tailored recommendations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/eligibility.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const csSlider = document.getElementById('credit_score');
+        const csLabel = document.getElementById('creditScoreVal');
+        const placeholder = document.getElementById('eligibilityPlaceholder');
+        const result = document.getElementById('eligibilityResult');
+        
+        csSlider.addEventListener('input', (e) => {
+            csLabel.innerText = e.target.value;
+        });
+
+        const form = document.getElementById('eligibilityForm');
+        form.addEventListener('submit', () => {
+            placeholder.style.display = 'none';
+        });
+    });
+</script>
+{% endblock %}

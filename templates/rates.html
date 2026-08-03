@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Interest Rates & Charges{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-3"><span class="text-gradient">Interest Rates & Charges</span></h1>
+        <p class="lead text-muted">Complete breakdown of interest percentages, tenures, and processing margins.</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <!-- standard rates grid -->
+        <div class="card glass-card p-4">
+            <h4 class="fw-bold mb-4">Standard Rate Matrix</h4>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Loan Scheme</th>
+                            <th>Category</th>
+                            <th>Min Rate (% p.a.)</th>
+                            <th>Max Rate (% p.a.)</th>
+                            <th>Processing Fee</th>
+                            <th>Max Tenure</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if loans %}
+                            {% for loan in loans %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="p-2 rounded bg-primary-light text-primary small" style="background-color: rgba(var(--primary-rgb), 0.08);">
+                                                <i class="fas {{ loan.icon_class }} fs-6"></i>
+                                            </span>
+                                            <span class="fw-bold text-main">{{ loan.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ loan.category }}</td>
+                                    <td class="text-success fw-bold">{{ loan.min_interest_rate }}%</td>
+                                    <td class="text-muted">{{ loan.max_interest_rate }}%</td>
+                                    <td>{{ loan.processing_fee_pct }}%</td>
+                                    <td>{{ loan.max_tenure_months }} Months</td>
+                                    <td class="text-center">
+                                        <a href="{{ url_for('main.apply') }}" class="btn btn-sm btn-primary px-3">Apply</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">No interest metrics found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | EMI Calculator{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        position: relative;
+        height: 250px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-3"><span class="text-gradient">EMI Calculator</span></h1>
+        <p class="lead text-muted">Estimate your monthly payout obligations instantly before applying.</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Inputs Column -->
+            <div class="col-lg-6">
+                <div class="card glass-card p-4 h-100">
+                    <h4 class="fw-bold mb-4">Calculate Your EMI</h4>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <label for="loanAmount" class="form-label fw-semibold">Loan Amount (INR)</label>
+                            <span class="text-primary fw-bold" id="loanAmountVal">INR 5,00,000</span>
+                        </div>
+                        <input type="range" class="form-range" id="loanAmount" min="20000" max="10000000" step="10000" value="500000">
+                        <input type="number" class="form-control mt-2" id="loanAmountNum" value="500000">
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <label for="interestRate" class="form-label fw-semibold">Interest Rate (% p.a.)</label>
+                            <span class="text-primary fw-bold" id="interestRateVal">10.5%</span>
+                        </div>
+                        <input type="range" class="form-range" id="interestRate" min="5" max="25" step="0.1" value="10.5">
+                        <input type="number" step="0.1" class="form-control mt-2" id="interestRateNum" value="10.5">
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <label for="loanTenure" class="form-label fw-semibold">Loan Tenure (Months)</label>
+                            <span class="text-primary fw-bold" id="loanTenureVal">60 Months</span>
+                        </div>
+                        <input type="range" class="form-range" id="loanTenure" min="3" max="360" step="1" value="60">
+                        <input type="number" class="form-control mt-2" id="loanTenureNum" value="60">
+                    </div>
+                    
+                    <!-- Form for PDF download backend triggers -->
+                    <form method="POST" action="{{ url_for('main.calculator_pdf') }}" target="_blank">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" id="pdf_amount" name="amount" value="500000">
+                        <input type="hidden" id="pdf_rate" name="rate" value="10.5">
+                        <input type="hidden" id="pdf_tenure" name="tenure" value="60">
+                        
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i class="far fa-file-pdf me-2"></i>Download Schedule PDF
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Visual Outputs Column -->
+            <div class="col-lg-6">
+                <div class="card glass-card p-4 h-100 text-center d-flex flex-column justify-content-between">
+                    <div>
+                        <h4 class="fw-bold mb-4 text-start">Summary Report</h4>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded glass-panel mb-3">
+                                    <small class="text-muted d-block small mb-1">Monthly EMI</small>
+                                    <span class="fs-5 fw-bold text-primary" id="monthlyEmi">INR 0</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded glass-panel mb-3">
+                                    <small class="text-muted d-block small mb-1">Total Interest</small>
+                                    <span class="fs-5 fw-bold text-success" id="totalInterest">INR 0</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3 border rounded glass-panel mb-3">
+                                    <small class="text-muted d-block small mb-1">Total Amount</small>
+                                    <span class="fs-5 fw-bold text-main" id="totalAmount">INR 0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pie Chart representation -->
+                    <div class="chart-container my-4">
+                        <canvas id="emiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amortization Schedule Table -->
+        <div class="card glass-card p-4 mt-5" id="amortizationSection" style="display: none;">
+            <h4 class="fw-bold mb-4">Amortization Payment Schedule</h4>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>Month</th>
+                            <th>EMI Paid</th>
+                            <th>Principal Component</th>
+                            <th>Interest Component</th>
+                            <th>Remaining Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/calculator.js') }}"></script>
+<script>
+    // Link slider inputs to their numeric indicators
+    document.addEventListener('DOMContentLoaded', () => {
+        const sliders = [
+            { s: 'loanAmount', n: 'loanAmountNum', v: 'loanAmountVal', prefix: 'INR ' },
+            { s: 'interestRate', n: 'interestRateNum', v: 'interestRateVal', suffix: '%' },
+            { s: 'loanTenure', n: 'loanTenureNum', v: 'loanTenureVal', suffix: ' Months' }
+        ];
+
+        sliders.forEach(item => {
+            const slider = document.getElementById(item.s);
+            const num = document.getElementById(item.n);
+            const label = document.getElementById(item.v);
+            const pdfHidden = document.getElementById(`pdf_${item.s.replace('loan', '').replace('interest', '').toLowerCase()}`);
+
+            const sync = (val) => {
+                slider.value = val;
+                num.value = val;
+                label.innerText = (item.prefix || '') + parseFloat(val).toLocaleString('en-IN') + (item.suffix || '');
+                if (pdfHidden) {
+                    pdfHidden.value = val;
+                }
+            };
+
+            slider.addEventListener('input', (e) => sync(e.target.value));
+            num.addEventListener('input', (e) => sync(e.target.value));
+        });
+    });
+</script>
+{% endblock %}

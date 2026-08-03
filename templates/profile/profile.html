@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Profile Settings{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-3"><span class="text-gradient">Profile Settings</span></h1>
+        <p class="lead text-muted">Update your contact information, address, and profile photo.</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card glass-card p-4 p-md-5">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Avatar Section -->
+                        <div class="text-center mb-5">
+                            <div class="position-relative d-inline-block">
+                                <img src="{% if current_user.photo.startswith('default_') %}{{ url_for('static', filename='images/' + current_user.photo) if false else 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }}{% else %}{{ url_for('static', filename='uploads/' + current_user.photo) }}{% endif %}" alt="Avatar" class="rounded-circle border border-4 border-white shadow-lg" width="120" height="120" style="object-fit: cover;">
+                            </div>
+                            <h5 class="fw-bold text-main mt-3 mb-1">{{ current_user.name }}</h5>
+                            <span class="badge bg-secondary-light text-secondary border border-secondary px-3 py-1 rounded-pill">
+                                {% if current_user.is_admin %}Administrator{% else %}Customer Account{% endif %}
+                            </span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                {{ form.name.label(class="form-label fw-semibold small") }}
+                                {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                                {% for error in form.name.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form.email.label(class="form-label fw-semibold small") }}
+                                {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+                                {% for error in form.email.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form.phone.label(class="form-label fw-semibold small") }}
+                                {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else "")) }}
+                                {% for error in form.phone.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                {{ form.photo.label(class="form-label fw-semibold small") }}
+                                {{ form.photo(class="form-control" + (" is-invalid" if form.photo.errors else "")) }}
+                                <small class="text-muted d-block mt-1">PNG, JPG, or JPEG format (max 10MB)</small>
+                                {% for error in form.photo.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                {{ form.address.label(class="form-label fw-semibold small") }}
+                                {{ form.address(class="form-control" + (" is-invalid" if form.address.errors else ""), rows=3) }}
+                                {% for error in form.address.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 text-center mt-3">
+                                {{ form.submit(class="btn btn-primary px-5 py-2") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

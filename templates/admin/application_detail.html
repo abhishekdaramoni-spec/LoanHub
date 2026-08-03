@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Review Application #{{ app.id }}{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container">
+        <h1 class="fw-bold mb-1">Review Application #{{ app.id }}</h1>
+        <p class="text-muted">Verification details for applicant: <strong>{{ app.full_name }}</strong></p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Left Info column -->
+            <div class="col-lg-8">
+                <!-- Applicant Details Card -->
+                <div class="card glass-card p-4 mb-4">
+                    <h5 class="fw-bold mb-4 border-bottom pb-2">Applicant Profile Details</h5>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <span class="text-muted d-block small">Full Name</span>
+                            <span class="fw-bold text-main">{{ app.full_name }}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <span class="text-muted d-block small">DOB</span>
+                            <span class="fw-semibold text-main">{{ app.dob.strftime('%Y-%m-%d') }}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <span class="text-muted d-block small">Gender</span>
+                            <span class="fw-semibold text-main">{{ app.gender }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-muted d-block small">Email Address</span>
+                            <span class="fw-semibold text-main">{{ app.email }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-muted d-block small">Phone Number</span>
+                            <span class="fw-semibold text-main">{{ app.phone }}</span>
+                        </div>
+                        <div class="col-12">
+                            <span class="text-muted d-block small">Residential Address</span>
+                            <span class="fw-semibold text-main">{{ app.address }}</span>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-4 mt-5 border-bottom pb-2">Financial & Scheme Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <span class="text-muted d-block small">Occupation</span>
+                            <span class="fw-bold text-main">{{ app.occupation }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-muted d-block small">Employer / Business</span>
+                            <span class="fw-semibold text-main">{{ app.employer }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-muted d-block small">Net Monthly Income</span>
+                            <span class="fw-bold text-success">INR {{ '{:,.2f}'.format(app.monthly_income) }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-muted d-block small">Loan Category Requested</span>
+                            <span class="fw-bold text-primary">{{ app.loan_type.name }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-muted d-block small">Capital Amount Requested</span>
+                            <span class="fw-bold text-primary">INR {{ '{:,.2f}'.format(app.loan_amount) }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="text-muted d-block small">Tenure Requested</span>
+                            <span class="fw-semibold text-main">{{ app.tenure_months }} Months</span>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-4 mt-5 border-bottom pb-2">KYC Identifiers</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <span class="text-muted d-block small">PAN Number</span>
+                            <span class="fw-bold text-main">{{ app.pan_number }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-muted d-block small">Aadhar UID</span>
+                            <span class="fw-bold text-main">{{ app.aadhar_number }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents Attachments Card -->
+                <div class="card glass-card p-4">
+                    <h5 class="fw-bold mb-4">Uploaded Validation Files</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded glass-panel d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold d-block small text-main">PAN Card copy</span>
+                                    <small class="text-muted">{{ app.pan_doc[:30] }}...</small>
+                                </div>
+                                <a href="{{ url_for('admin.view_document', filename=app.pan_doc) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> View</a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded glass-panel d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold d-block small text-main">Aadhar Card copy</span>
+                                    <small class="text-muted">{{ app.aadhar_doc[:30] }}...</small>
+                                </div>
+                                <a href="{{ url_for('admin.view_document', filename=app.aadhar_doc) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> View</a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded glass-panel d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold d-block small text-main">Salary Slips</span>
+                                    <small class="text-muted">{{ app.salary_slip_doc[:30] }}...</small>
+                                </div>
+                                <a href="{{ url_for('admin.view_document', filename=app.salary_slip_doc) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> View</a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded glass-panel d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold d-block small text-main">Bank Statements</span>
+                                    <small class="text-muted">{{ app.bank_statement_doc[:30] }}...</small>
+                                </div>
+                                <a href="{{ url_for('admin.view_document', filename=app.bank_statement_doc) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i> View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Audit Action panel -->
+            <div class="col-lg-4">
+                <div class="card glass-card p-4 sticky-top" style="top: 100px;">
+                    <h5 class="fw-bold mb-3">Audit Panel</h5>
+                    
+                    <div class="mb-4">
+                        <span class="text-muted d-block small">Current State</span>
+                        <span class="badge {% if app.status == 'Approved' %}bg-success{% elif app.status == 'Rejected' %}bg-danger{% elif app.status == 'In Review' %}bg-info{% else %}bg-warning{% endif %} fs-6 px-3 py-2 mt-1">
+                            {{ app.status }}
+                        </span>
+                    </div>
+
+                    {% if app.status == 'Pending' or app.status == 'In Review' %}
+                        <form method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
+                            <div class="mb-3">
+                                <label for="remarks" class="form-label fw-semibold small text-muted">Verification Remarks / Notes</label>
+                                <textarea class="form-control" id="remarks" name="remarks" rows="4" placeholder="Enter reason for approval or rejection..." required>{{ app.remarks or '' }}</textarea>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" name="action" value="Approve" class="btn btn-success"><i class="fas fa-check-circle me-2"></i>Approve Application</button>
+                                <button type="submit" name="action" value="Reject" class="btn btn-danger"><i class="fas fa-times-circle me-2"></i>Reject Application</button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="p-3 border rounded glass-panel small text-muted">
+                            This application has been processed. Status is <strong>{{ app.status }}</strong>.
+                            {% if app.remarks %}
+                                <div class="mt-2 pt-2 border-top">
+                                    <strong>Archived Remarks:</strong><br>{{ app.remarks }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

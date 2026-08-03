@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Our Loan Products{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-3"><span class="text-gradient">Our Loan Products</span></h1>
+        <p class="lead text-muted">Compare, evaluate and choose from our wide range of tailored credit facilities.</p>
+    </div>
+</section>
+
+<!-- -------------------------------------------------------------
+-- FILTER & SEARCH BLOCK
+------------------------------------------------------------- -->
+<section class="py-4">
+    <div class="container">
+        <div class="card glass-card p-4 mb-5">
+            <form method="GET" action="{{ url_for('main.loans') }}" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="search" class="form-label small fw-bold">Search Loans</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="search" name="search" value="{{ search }}" placeholder="e.g. Personal, Gold">
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="category" class="form-label small fw-bold">Category</label>
+                    <select class="form-select" id="category" name="category">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}" {% if category == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label for="min_amount" class="form-label small fw-bold">Min Loan Amount (INR)</label>
+                    <input type="number" class="form-control" id="min_amount" name="min_amount" value="{{ min_amount }}" placeholder="e.g. 100000">
+                </div>
+
+                <div class="col-md-2">
+                    <label for="max_rate" class="form-label small fw-bold">Max Interest Rate (% p.a.)</label>
+                    <input type="number" step="0.1" class="form-control" id="max_rate" name="max_rate" value="{{ max_rate }}" placeholder="e.g. 10.5">
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter me-2"></i>Apply Filters</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- -------------------------------------------------------------
+        -- LOAN CARDS GRID
+        ------------------------------------------------------------- -->
+        <div class="row g-4">
+            {% if loans %}
+                {% for loan in loans %}
+                    <div class="col-lg-4 col-md-6 reveal">
+                        <div class="card glass-card h-100 p-4 d-flex flex-column position-relative">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="p-3 rounded bg-primary-light text-primary" style="background-color: rgba(var(--primary-rgb), 0.1);">
+                                    <i class="fas {{ loan.icon_class }} fs-4"></i>
+                                </span>
+                                <div class="d-flex gap-2">
+                                    <!-- Wishlist Button -->
+                                    <button class="btn btn-link p-1 fav-toggle" data-id="{{ loan.id }}" aria-label="Add to Wishlist">
+                                        <i class="{% if session.favorite_loans and loan.id in session.favorite_loans %}fas fa-heart text-danger{% else %}far fa-heart{% endif %}"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <h4 class="fw-bold text-main mb-1">{{ loan.name }}</h4>
+                            <span class="badge bg-secondary-light text-secondary border border-secondary align-self-start mb-3">{{ loan.category }}</span>
+                            
+                            <p class="text-muted small flex-grow-1 mb-4">{{ loan.description }}</p>
+                            
+                            <div class="border-top pt-3 mb-4">
+                                <div class="row g-2 text-center">
+                                    <div class="col-6 text-start mb-2">
+                                        <small class="text-muted d-block">Interest Rate</small>
+                                        <span class="fw-bold text-gradient fs-5">{{ loan.min_interest_rate }}% - {{ loan.max_interest_rate }}%</span>
+                                    </div>
+                                    <div class="col-6 text-start mb-2">
+                                        <small class="text-muted d-block">Approval Time</small>
+                                        <span class="fw-semibold text-main"><i class="far fa-clock text-secondary me-1"></i>{{ loan.approval_time }}</span>
+                                    </div>
+                                    <div class="col-6 text-start">
+                                        <small class="text-muted d-block">Limit Range</small>
+                                        <span class="fw-semibold text-main text-wrap" style="font-size: 0.85rem;">
+                                            INR {{ '{:,.0f}'.format(loan.min_amount) }} - {{ '{:,.0f}'.format(loan.max_amount) }}
+                                        </span>
+                                    </div>
+                                    <div class="col-6 text-start">
+                                        <small class="text-muted d-block">Processing Fee</small>
+                                        <span class="fw-semibold text-main">{{ loan.processing_fee_pct }}% of loan</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted d-block fw-semibold mb-1">Key Eligibility:</small>
+                                <p class="small text-muted mb-0"><i class="fas fa-check text-success me-1"></i>{{ loan.eligibility_criteria }}</p>
+                            </div>
+
+                            <div class="d-flex gap-2 mt-auto pt-3 border-top">
+                                <a href="{{ url_for('main.loan_detail', slug=loan.slug) }}" class="btn btn-outline-primary btn-sm w-100">Learn More</a>
+                                <a href="{{ url_for('main.compare', id=loan.id) }}" class="btn btn-outline-secondary btn-sm w-100"><i class="fas fa-balance-scale"></i> Compare</a>
+                                <a href="{{ url_for('main.apply') }}" class="btn btn-primary btn-sm w-100">Apply</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-box-open text-muted fs-1 mb-3"></i>
+                    <h4 class="fw-bold">No Loans Found</h4>
+                    <p class="text-muted">Try adjusting your filters or search keywords.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

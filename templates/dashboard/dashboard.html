@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Customer Dashboard{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container">
+        <div class="row align-items-center justify-content-between g-4">
+            <div class="col-md-8">
+                <h1 class="fw-bold mb-1">Welcome back, <span class="text-gradient">{{ current_user.name }}</span></h1>
+                <p class="text-muted">Manage your applications, simulated limits, and repayment history.</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{{ url_for('main.apply') }}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Apply New Loan</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <!-- 1. Stats Cards Grid -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card glass-card p-4 text-center">
+                    <span class="text-muted d-block small mb-1">Total Submissions</span>
+                    <h3 class="fw-bold text-primary">{{ total_loans }}</h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card glass-card p-4 text-center">
+                    <span class="text-muted d-block small mb-1">In Verification</span>
+                    <h3 class="fw-bold text-warning">{{ pending_loans }}</h3>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card glass-card p-4 text-center">
+                    <span class="text-muted d-block small mb-1">Approved Limits</span>
+                    <h3 class="fw-bold text-success">{{ approved_loans }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Tracking and EMIs -->
+            <div class="col-lg-8">
+                <!-- Active Applications and Repayment schedules -->
+                {% if approved_apps %}
+                    <div class="card glass-card p-4 mb-4">
+                        <h5 class="fw-bold mb-4">Active Disbursed Accounts</h5>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Application ID</th>
+                                        <th>Loan Account</th>
+                                        <th>Disbursed Principal</th>
+                                        <th>Active Balance</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for app in approved_apps %}
+                                        <tr>
+                                            <td>#{{ app.id }}</td>
+                                            <td>
+                                                <span class="fw-bold text-main">{{ app.loan_type.name }}</span>
+                                                <small class="text-muted d-block">{{ app.tenure_months }} Months @ {{ app.loan_type.min_interest_rate }}%</small>
+                                            </td>
+                                            <td>INR {{ '{:,.2f}'.format(app.loan_amount) }}</td>
+                                            <td>
+                                                {% if app.emi_payments %}
+                                                    INR {{ '{:,.2f}'.format(app.emi_payments[-1].balance_remaining) }}
+                                                {% else %}
+                                                    INR {{ '{:,.2f}'.format(app.loan_amount) }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('main.download_receipt', app_id=app.id) }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-file-invoice"></i> Receipt</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Tracker list -->
+                <div class="card glass-card p-4 mb-4">
+                    <h5 class="fw-bold mb-4">Application Progress Tracker</h5>
+                    {% if applications %}
+                        {% for app in applications[:3] %}
+                            <div class="border rounded p-3 mb-3 glass-panel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h6 class="fw-bold mb-0">{{ app.loan_type.name }} (#{{ app.id }})</h6>
+                                        <small class="text-muted">Applied on: {{ app.applied_at.strftime('%Y-%m-%d') }}</small>
+                                    </div>
+                                    <span class="badge {% if app.status == 'Approved' %}bg-success{% elif app.status == 'Rejected' %}bg-danger{% elif app.status == 'In Review' %}bg-info{% else %}bg-warning{% endif %}">
+                                        {{ app.status }}
+                                    </span>
+                                </div>
+                                
+                                <!-- Progress steps bar -->
+                                <div class="row text-center g-2 small">
+                                    <div class="col-3">
+                                        <div class="p-2 border rounded {% if app.status in ['Pending', 'In Review', 'Approved', 'Rejected'] %}bg-primary text-white{% else %}text-muted{% endif %}">Applied</div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="p-2 border rounded {% if app.status in ['In Review', 'Approved', 'Rejected'] %}bg-primary text-white{% else %}text-muted{% endif %}">In Review</div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="p-2 border rounded {% if app.status in ['Approved', 'Rejected'] %}bg-primary text-white{% else %}text-muted{% endif %}">Processed</div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="p-2 border rounded {% if app.status == 'Approved' %}bg-success text-white{% elif app.status == 'Rejected' %}bg-danger text-white{% else %}text-muted{% endif %}">
+                                            {{ app.status if app.status in ['Approved', 'Rejected'] else 'Disbursed' }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if app.remarks %}
+                                    <div class="mt-3 p-2 bg-light rounded text-muted small">
+                                        <strong>Officer Remarks:</strong> {{ app.remarks }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-4 mb-0"><i class="fas fa-folder-open fs-2 mb-2 d-block"></i> No recent applications found.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right Column: Interactive Widgets -->
+            <div class="col-lg-4">
+                <!-- Credit score simulator widget -->
+                <div class="card glass-card p-4 mb-4">
+                    <h5 class="fw-bold mb-3">Credit Score Simulator</h5>
+                    <div class="text-center py-3">
+                        <span class="display-5 fw-bold text-gradient" id="scoreDisplay">750</span>
+                        <p class="small fw-semibold text-success mt-1" id="scoreRating">Excellent Profile</p>
+                    </div>
+                    <input type="range" class="form-range" id="cibilRange" min="300" max="900" step="5" value="750">
+                    <div class="p-3 border rounded glass-panel mt-3 small text-muted" id="scoreAdvice">
+                        Your credit profile qualifies you for the lowest starting interest rates (starting at 8.4% p.a.). Processing fees are minimized.
+                    </div>
+                </div>
+
+                <!-- AI Loan Recommendation -->
+                {% if ai_rec %}
+                    <div class="card glass-card p-4 mb-4 bg-primary text-white border-0 position-relative overflow-hidden">
+                        <div class="position-absolute rounded-circle bg-white" style="width: 150px; height: 150px; opacity: 0.05; bottom: -50px; right: -50px;"></div>
+                        <h5 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2 text-warning animate-pulse"></i>AI Recommendation</h5>
+                        <p class="small text-white-50">Based on your background and history, you qualify for:</p>
+                        <h4 class="fw-bold text-white mb-2">{{ ai_rec.name }}</h4>
+                        <p class="small text-white-50 mb-3">Interest rates starting from {{ ai_rec.min_interest_rate }}% p.a.</p>
+                        <a href="{{ url_for('main.loan_detail', slug=ai_rec.slug) }}" class="btn btn-light btn-sm text-primary w-100 fw-bold">View Product</a>
+                    </div>
+                {% endif %}
+
+                <!-- Favorites Tray -->
+                <div class="card glass-card p-4">
+                    <h5 class="fw-bold mb-3">Wishlisted Loans</h5>
+                    {% if fav_loans %}
+                        {% for fav in fav_loans %}
+                            <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-2">
+                                <div>
+                                    <h6 class="mb-0 fw-semibold">{{ fav.name }}</h6>
+                                    <small class="text-muted">Rates: {{ fav.min_interest_rate }}% - {{ fav.max_interest_rate }}%</small>
+                                </div>
+                                <a href="{{ url_for('main.loan_detail', slug=fav.slug) }}" class="btn btn-sm btn-link"><i class="fas fa-chevron-right"></i></a>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted small mb-0 text-center py-3"><i class="far fa-heart mb-1 d-block"></i> Favorites folder is empty.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const range = document.getElementById('cibilRange');
+        const display = document.getElementById('scoreDisplay');
+        const rating = document.getElementById('scoreRating');
+        const advice = document.getElementById('scoreAdvice');
+
+        if (range) {
+            range.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                display.innerText = val;
+
+                if (val >= 750) {
+                    rating.innerText = 'Excellent Profile';
+                    rating.className = 'small fw-semibold text-success mt-1';
+                    advice.innerHTML = 'Your credit profile qualifies you for the lowest starting interest rates (starting at 8.4% p.a.). Processing fees are minimized.';
+                } else if (val >= 700) {
+                    rating.innerText = 'Good Profile';
+                    rating.className = 'small fw-semibold text-info mt-1';
+                    advice.innerHTML = 'Standard processing speeds apply. Rates start from 9.5% p.a. High chance of loan approval.';
+                } else if (val >= 600) {
+                    rating.innerText = 'Average Profile';
+                    rating.className = 'small fw-semibold text-warning mt-1';
+                    advice.innerHTML = 'Interest rates might range from 11.5% to 15.5%. Additional security / co-applicant might be requested.';
+                } else {
+                    rating.innerText = 'Poor Profile';
+                    rating.className = 'small fw-semibold text-danger mt-1';
+                    advice.innerHTML = 'Approval probability is low. Consider reducing existing debts or raising credit ratings to qualify.';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-chart {
+        position: relative;
+        height: 250px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container">
+        <h1 class="fw-bold mb-1"><i class="fas fa-user-shield text-primary me-2"></i>Admin Dashboard</h1>
+        <p class="text-muted">Monitor global lending stats, approve portfolios, and manage system rates.</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <!-- 1. Stats row -->
+        <div class="row g-3 mb-5">
+            <div class="col-md-3">
+                <div class="card glass-card p-4 text-center">
+                    <span class="text-muted d-block small mb-1">Total Users</span>
+                    <h3 class="fw-bold text-main">{{ users_count }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card glass-card p-4 text-center">
+                    <span class="text-muted d-block small mb-1">Loan Applications</span>
+                    <h3 class="fw-bold text-primary">{{ apps_count }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card glass-card p-4 text-center">
+                    <span class="text-muted d-block small mb-1">Approved Cases</span>
+                    <h3 class="fw-bold text-success">{{ approved_count }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card glass-card p-4 text-center">
+                    <span class="text-muted d-block small mb-1">Pending Cases</span>
+                    <h3 class="fw-bold text-warning">{{ pending_count }}</h3>
+                </div>
+            </div>
+            <div class="col-12 mt-3">
+                <div class="card glass-card p-4 bg-primary text-white text-center border-0">
+                    <span class="text-white-50 d-block small mb-1">Total Approved Disbursed Capital</span>
+                    <h2 class="fw-bold">INR {{ '{:,.2f}'.format(total_disbursed) }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Analytics Charts Row -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="card glass-card p-4">
+                    <h5 class="fw-bold mb-4">Application Status Ratio</h5>
+                    <div class="analytics-chart">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card glass-card p-4">
+                    <h5 class="fw-bold mb-4">Disbursements per Category</h5>
+                    <div class="analytics-chart">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Recent Applications Table -->
+        <div class="card glass-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <h5 class="fw-bold mb-0">Recent Applications Received</h5>
+                <a href="{{ url_for('admin.loans') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Applicant</th>
+                            <th>Category</th>
+                            <th>Amount Requested</th>
+                            <th>Status</th>
+                            <th>Applied Date</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_applications %}
+                            {% for app in recent_applications %}
+                                <tr>
+                                    <td>#{{ app.id }}</td>
+                                    <td>
+                                        <span class="fw-bold text-main">{{ app.full_name }}</span>
+                                        <small class="text-muted d-block">Monthly Income: INR {{ '{:,.0f}'.format(app.monthly_income) }}</small>
+                                    </td>
+                                    <td>{{ app.loan_type.name }}</td>
+                                    <td>INR {{ '{:,.2f}'.format(app.loan_amount) }}</td>
+                                    <td>
+                                        <span class="badge {% if app.status == 'Approved' %}bg-success{% elif app.status == 'Rejected' %}bg-danger{% elif app.status == 'In Review' %}bg-info{% else %}bg-warning{% endif %}">
+                                            {{ app.status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ app.applied_at.strftime('%Y-%m-%d') }}</td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('admin.review_application', app_id=app.id) }}" class="btn btn-sm btn-primary">Review</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">No applications found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch('/admin/analytics')
+        .then(res => res.json())
+        .then(data => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const labelColor = isDark ? '#F8FAFC' : '#2D3748';
+
+            // 1. Status Ratio Chart
+            const ctxStatus = document.getElementById('statusChart').getContext('2d');
+            new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: data.status_labels,
+                    datasets: [{
+                        data: data.status_values,
+                        backgroundColor: ['#F59E0B', '#3B82F6', '#10B981', '#EF4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: labelColor, font: { family: 'Poppins' } }
+                        }
+                    }
+                }
+            });
+
+            // 2. Category Disbursements Chart
+            const ctxCat = document.getElementById('categoryChart').getContext('2d');
+            new Chart(ctxCat, {
+                type: 'bar',
+                data: {
+                    labels: data.category_labels,
+                    datasets: [{
+                        label: 'INR Disbursed',
+                        data: data.category_values,
+                        backgroundColor: '#0056D2',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { ticks: { color: labelColor } },
+                        y: { ticks: { color: labelColor } }
+                    }
+                }
+            });
+        })
+        .catch(err => console.error('Failed to load chart analytics:', err));
+    });
+</script>
+{% endblock %}

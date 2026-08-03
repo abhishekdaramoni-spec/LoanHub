@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Support Inbox{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container">
+        <h1 class="fw-bold mb-1"><i class="fas fa-envelope text-primary me-2"></i>Support Inbox</h1>
+        <p class="text-muted">Review messages filed through the website contact page.</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-12">
+                <div class="card glass-card p-4">
+                    <h5 class="fw-bold mb-4">Customer Messages</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Sender</th>
+                                    <th>Subject</th>
+                                    <th>Message</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if messages %}
+                                    {% for msg in messages %}
+                                        <tr id="row_{{ msg.id }}">
+                                            <td>
+                                                <span class="fw-bold text-main">{{ msg.name }}</span>
+                                                <small class="text-muted d-block">{{ msg.email }} | {{ msg.phone or 'No Phone' }}</small>
+                                            </td>
+                                            <td><span class="fw-semibold text-main">{{ msg.subject }}</span></td>
+                                            <td style="max-width: 300px;"><p class="small text-muted mb-0">{{ msg.message }}</p></td>
+                                            <td>{{ msg.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>
+                                                <span class="badge status-badge {% if msg.is_read %}bg-success{% else %}bg-warning{% endif %}" id="badge_{{ msg.id }}">
+                                                    {{ 'Read' if msg.is_read else 'New' }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                {% if not msg.is_read %}
+                                                    <button class="btn btn-sm btn-outline-primary mark-read-btn" data-id="{{ msg.id }}">
+                                                        Mark Read
+                                                    </button>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">Inbox is empty.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const readBtns = document.querySelectorAll('.mark-read-btn');
+        const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+
+        readBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const msgId = btn.getAttribute('data-id');
+                const token = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
+                fetch(`/admin/messages/${msgId}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': token
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const badge = document.getElementById(`badge_${msgId}`);
+                        badge.innerText = 'Read';
+                        badge.className = 'badge status-badge bg-success';
+                        btn.remove();
+                        window.showToast('Message marked as read.', 'success');
+                    }
+                })
+                .catch(err => console.error(err));
+            });
+        });
+    });
+</script>
+{% endblock %}

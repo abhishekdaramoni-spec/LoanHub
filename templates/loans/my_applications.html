@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Track My Applications{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-3"><span class="text-gradient">Track My Applications</span></h1>
+        <p class="lead text-muted">View full status tracking history and download application receipts.</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <div class="card glass-card p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Application ID</th>
+                            <th>Loan Category</th>
+                            <th>Requested Capital</th>
+                            <th>Tenure Requested</th>
+                            <th>Date Filed</th>
+                            <th>Status State</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if applications %}
+                            {% for app in applications %}
+                                <tr>
+                                    <td><strong>#{{ app.id }}</strong></td>
+                                    <td>
+                                        <span class="fw-bold text-main">{{ app.loan_type.name }}</span>
+                                    </td>
+                                    <td>INR {{ '{:,.2f}'.format(app.loan_amount) }}</td>
+                                    <td>{{ app.tenure_months }} Months</td>
+                                    <td>{{ app.applied_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <span class="badge {% if app.status == 'Approved' %}bg-success{% elif app.status == 'Rejected' %}bg-danger{% elif app.status == 'In Review' %}bg-info{% else %}bg-warning{% endif %}">
+                                            {{ app.status }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('main.download_receipt', app_id=app.id) }}" class="btn btn-sm btn-outline-primary me-2">
+                                            <i class="fas fa-download me-1"></i> Receipt
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% if app.remarks %}
+                                    <tr class="table-light">
+                                        <td colspan="7" class="small text-muted py-2 px-4">
+                                            <i class="fas fa-info-circle text-secondary me-1"></i> <strong>Audit Feedbacks:</strong> {{ app.remarks }}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="fas fa-receipt text-muted fs-1 mb-3"></i>
+                                    <h5 class="fw-bold">No Applications Filed Yet</h5>
+                                    <p class="text-muted small">You haven't requested any loan products. Click the button below to get started.</p>
+                                    <a href="{{ url_for('main.apply') }}" class="btn btn-primary btn-sm mt-2">Apply Now</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

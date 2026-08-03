@@ -1,0 +1,23 @@
+# Python Caching
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Databases
+database/*.db
+database/loansphere.db
+
+# Flask upload files
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# OS Files
+.DS_Store
+Thumbs.db

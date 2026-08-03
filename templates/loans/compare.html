@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Compare Loans{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-3"><span class="text-gradient">Compare Loans</span></h1>
+        <p class="lead text-muted">Evaluate loan metrics side-by-side to make the optimal decision.</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <!-- Selectors Row -->
+        <div class="card glass-card p-4 mb-4">
+            <h5 class="fw-bold mb-3">Add Loans to Comparison</h5>
+            <form id="compareSelectorForm" class="row g-3 align-items-center">
+                <div class="col-md-8">
+                    <select class="form-select" id="loanSelect">
+                        <option value="">Select a Loan type...</option>
+                        {% for loan in all_loans %}
+                            <option value="{{ loan.id }}">{{ loan.name }} (Starting @ {{ loan.min_interest_rate }}%)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary w-100" id="addCompareBtn">
+                        <i class="fas fa-plus me-2"></i>Add to Compare
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Comparison Table Card -->
+        {% if selected_loans %}
+            <div class="card glass-card p-4">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle text-center">
+                        <thead>
+                            <tr class="table-light">
+                                <th style="width: 25%; text-align: left;">Metrics</th>
+                                {% for loan in selected_loans %}
+                                    <th style="width: 25%;">
+                                        <div class="d-flex justify-content-between align-items-center px-2">
+                                            <span class="fw-bold text-primary">{{ loan.name }}</span>
+                                            <button class="btn btn-sm btn-link text-danger remove-col-btn" data-id="{{ loan.id }}">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-semibold text-start">Category</td>
+                                {% for loan in selected_loans %}
+                                    <td>{{ loan.category }}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-start">Interest Rate (% p.a.)</td>
+                                {% for loan in selected_loans %}
+                                    <td class="text-gradient fw-bold">{{ loan.min_interest_rate }}% - {{ loan.max_interest_rate }}%</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-start">Amount Range (INR)</td>
+                                {% for loan in selected_loans %}
+                                    <td>INR {{ '{:,.2f}'.format(loan.min_amount) }} to {{ '{:,.2f}'.format(loan.max_amount) }}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-start">Max Repayment Tenure</td>
+                                {% for loan in selected_loans %}
+                                    <td>{{ loan.max_tenure_months }} Months</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-start">Processing Fee</td>
+                                {% for loan in selected_loans %}
+                                    <td>{{ loan.processing_fee_pct }}% of loan amount</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-start">Approval Timeline</td>
+                                {% for loan in selected_loans %}
+                                    <td><i class="far fa-clock text-secondary me-1"></i>{{ loan.approval_time }}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-start">Key Eligibility</td>
+                                {% for loan in selected_loans %}
+                                    <td class="small text-muted">{{ loan.eligibility_criteria }}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-start">Action</td>
+                                {% for loan in selected_loans %}
+                                    <td>
+                                        <a href="{{ url_for('main.apply') }}" class="btn btn-sm btn-primary px-3">Apply Now</a>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <!-- No Selection Card -->
+            <div class="card glass-card p-5 text-center border-dashed">
+                <i class="fas fa-balance-scale text-muted mb-3" style="font-size: 5rem; opacity: 0.5;"></i>
+                <h4 class="fw-bold text-muted">No Selection for Comparison</h4>
+                <p class="text-muted max-width-350 mx-auto">Select loan types from the drop-down or click the compare button on the loans list to inspect rates and tenures side-by-side.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const addBtn = document.getElementById('addCompareBtn');
+        const selectEl = document.getElementById('loanSelect');
+        
+        // Get active IDs from current URL params
+        const getUrlIds = () => {
+            const params = new URLSearchParams(window.location.search);
+            return params.getAll('id');
+        };
+
+        if (addBtn && selectEl) {
+            addBtn.addEventListener('click', () => {
+                const loanId = selectEl.value;
+                if (!loanId) return;
+
+                const activeIds = getUrlIds();
+                if (activeIds.includes(loanId)) {
+                    window.showToast('Loan is already added to comparison.', 'warning');
+                    return;
+                }
+
+                if (activeIds.length >= 3) {
+                    window.showToast('You can compare a maximum of 3 loans at once.', 'warning');
+                    return;
+                }
+
+                activeIds.push(loanId);
+                
+                // Build new query string
+                const queryStr = activeIds.map(id => `id=${id}`).join('&');
+                window.location.href = `${window.location.pathname}?${queryStr}`;
+            });
+        }
+
+        // Handle deletion of comparison cols
+        const removeBtns = document.querySelectorAll('.remove-col-btn');
+        removeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idToRemove = btn.getAttribute('data-id');
+                const activeIds = getUrlIds().filter(id => id !== idToRemove);
+                
+                const queryStr = activeIds.map(id => `id=${id}`).join('&');
+                window.location.href = activeIds.length > 0 ? `${window.location.pathname}?${queryStr}` : window.location.pathname;
+            });
+        });
+    });
+</script>
+{% endblock %}

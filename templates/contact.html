@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}LoanSphere | Contact Us{% endblock %}
+
+{% block content %}
+<section class="py-5 hero-section">
+    <div class="container text-center">
+        <h1 class="fw-bold mb-3"><span class="text-gradient">Contact Us</span></h1>
+        <p class="lead text-muted">Have a query? Drop us a message, visit a branch, or connect via support hotline.</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Left Info column -->
+            <div class="col-lg-5">
+                <div class="card glass-card p-4 mb-4">
+                    <h4 class="fw-bold mb-4">Headquarters Details</h4>
+                    
+                    <div class="d-flex gap-3 mb-3">
+                        <span class="text-primary fs-4"><i class="fas fa-map-location-dot"></i></span>
+                        <div>
+                            <h6 class="fw-bold mb-1">Corporate Address</h6>
+                            <p class="text-muted small mb-0">LoanSphere Tower, Bandra Kurla Complex, Mumbai, MH 400051</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mb-3">
+                        <span class="text-primary fs-4"><i class="fas fa-phone-volume"></i></span>
+                        <div>
+                            <h6 class="fw-bold mb-1">Phone Support</h6>
+                            <p class="text-muted small mb-0">+91 22 6655 4433 | Toll-free: 1800 120 4455</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mb-3">
+                        <span class="text-primary fs-4"><i class="fas fa-envelope-open-text"></i></span>
+                        <div>
+                            <h6 class="fw-bold mb-1">Support Email</h6>
+                            <p class="text-muted small mb-0">support@loansphere.bank | corporate@loansphere.bank</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <span class="text-primary fs-4"><i class="fas fa-business-time"></i></span>
+                        <div>
+                            <h6 class="fw-bold mb-1">Working Hours</h6>
+                            <p class="text-muted small mb-0">Monday - Friday: 09:30 AM to 05:30 PM | Saturdays: 09:30 AM to 02:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Google Map Embed Placeholder -->
+                <div class="card glass-card overflow-hidden" style="height: 250px;">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3771.4883584852923!2d72.86438781489728!3d19.064249387093853!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c8e6dfd1587b%3A0xe5a3ea23ef859fb1!2sBandra%20Kurla%20Complex%2C%20Bandra%20East%2C%20Mumbai%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1655000000000!5m2!1sen!2sin" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+
+            <!-- Right Message form column -->
+            <div class="col-lg-7">
+                <div class="card glass-card p-4 p-md-5">
+                    <h4 class="fw-bold mb-4">Send a Message</h4>
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                {{ form.name.label(class="form-label fw-semibold small") }}
+                                {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="Your full name") }}
+                                {% for error in form.name.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.email.label(class="form-label fw-semibold small") }}
+                                {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="name@example.com") }}
+                                {% for error in form.email.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                {{ form.phone.label(class="form-label fw-semibold small") }}
+                                {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="e.g. +919876543210") }}
+                                {% for error in form.phone.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                {{ form.subject.label(class="form-label fw-semibold small") }}
+                                {{ form.subject(class="form-control" + (" is-invalid" if form.subject.errors else ""), placeholder="What is this inquiry about?") }}
+                                {% for error in form.subject.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                {{ form.message.label(class="form-label fw-semibold small") }}
+                                {{ form.message(class="form-control" + (" is-invalid" if form.message.errors else ""), rows=5, placeholder="Detail your query here...") }}
+                                {% for error in form.message.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12 text-center">
+                                {{ form.submit(class="btn btn-primary px-5 py-2") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
