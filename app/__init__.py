@@ -23,8 +23,21 @@ def create_app(config_class=Config):
             print("Connected to MySQL database successfully.")
         except Exception as e:
             print(f"MySQL connection failed ({e}). Falling back to local SQLite database.")
-            db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'database', 'loansphere.db')
-            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            if os.environ.get('VERCEL'):
+                db_path = '/tmp/loansphere.db'
+                if not os.path.exists(db_path):
+                    import shutil
+                    src_db = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'database', 'loansphere.db')
+                    if os.path.exists(src_db):
+                        try:
+                            shutil.copy(src_db, db_path)
+                            print("Copied pre-seeded SQLite database to /tmp successfully.")
+                        except Exception as copy_err:
+                            print(f"Failed to copy pre-seeded database to /tmp: {copy_err}")
+            else:
+                db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'database', 'loansphere.db')
+                os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            
             app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 
     # Initialize extensions
