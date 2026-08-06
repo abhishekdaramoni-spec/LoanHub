@@ -66,18 +66,19 @@ app.wsgi_app = WhiteNoise(app.wsgi_app, root=app.static_folder, prefix=app.stati
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-if __name__ == '__main__':
-    # Ensure static upload directory exists
+# Initialize directories, database tables, and default seed data on module load (Gunicorn safe)
+with app.app_context():
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    
-    # Initialize DB tables in app context if not exists
-    with app.app_context():
-        try:
-            db.create_all()
-            print("Database tables initialized successfully.")
-        except Exception as e:
-            print(f"Warning: Database creation skipped or failed: {e}")
-            
+    try:
+        db.create_all()
+        print("Database tables initialized successfully.")
+        # Auto-seed basic data if tables are empty
+        from utils.seeder import seed_default_data
+        seed_default_data()
+    except Exception as e:
+        print(f"Warning: Database creation or seeding failed: {e}")
+
+if __name__ == '__main__':
     # Run server on port read from environment
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
