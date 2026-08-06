@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, send_file, current_app, session
 from flask_login import login_required, current_user
 from utils.extensions import db
-from models import User, LoanType, LoanApplication, EMIHistory, FAQ, Notification, ContactMessage
+from models import User, LoanType, LoanApplication, EMIHistory, FAQ, Notification, ContactMessage, InterestRate
 from utils.forms import LoanApplicationForm, ContactForm
 from services import send_async_email, generate_calculator_pdf, generate_receipt_pdf
 from decimal import Decimal
