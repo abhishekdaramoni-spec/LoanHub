@@ -3,7 +3,7 @@ import os
 class Config:
     # General Config
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'loansphere-super-secure-secret-key-123456'
-    DEBUG = os.environ.get('FLASK_DEBUG') or True
+    DEBUG = os.environ.get('FLASK_DEBUG') or False
 
     # Database Configuration - defaults to local MySQL instance
     DB_USER = os.environ.get('DB_USER') or 'root'
@@ -16,8 +16,8 @@ class Config:
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Uploads Configuration resolved relative to the app module parent directory
-    UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'static', 'uploads')
+    # Uploads Configuration resolved relative to the project root directory
+    UPLOAD_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'uploads')
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024
     ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 

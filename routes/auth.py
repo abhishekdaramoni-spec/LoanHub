@@ -3,10 +3,10 @@ import uuid
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, current_user, login_required
-from app.extensions import db
-from app.models import User
-from app.forms import LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm, ProfileForm
-from app.services import send_async_email
+from utils.extensions import db
+from models import User
+from utils.forms import LoginForm, RegisterForm, ForgotPasswordForm, ResetPasswordForm, ProfileForm
+from services import send_async_email
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -31,7 +31,7 @@ def save_document(file_field):
     return None
 
 def create_notification(user_id, message_text):
-    from app.models import Notification
+    from models import Notification
     notif = Notification(user_id=user_id, message=message_text)
     db.session.add(notif)
     db.session.commit()

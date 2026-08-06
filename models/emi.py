@@ -1,5 +1,5 @@
 from datetime import datetime
-from app.extensions import db
+from utils.extensions import db
 
 class EMIHistory(db.Model):
     __tablename__ = 'emi_history'

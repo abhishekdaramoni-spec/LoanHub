@@ -1,6 +1,6 @@
 from flask import current_app
 from flask_mail import Message
-from app.extensions import mail
+from utils.extensions import mail
 
 def send_async_email(subject, recipient, body_text, body_html=None):
     """Sends email. Catches exceptions if SMTP is not configured and prints to console instead."""

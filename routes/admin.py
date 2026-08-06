@@ -2,10 +2,10 @@ import os
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, send_file, current_app
 from flask_login import login_required, current_user
-from app.extensions import db
-from app.models import User, LoanType, LoanApplication, EMIHistory, InterestRate, ContactMessage, Notification
-from app.forms import InterestRateForm
-from app.services import send_async_email
+from utils.extensions import db
+from models import User, LoanType, LoanApplication, EMIHistory, InterestRate, ContactMessage, Notification
+from utils.forms import InterestRateForm
+from services import send_async_email
 from decimal import Decimal
 from functools import wraps
 

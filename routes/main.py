@@ -3,10 +3,10 @@ import uuid
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, send_file, current_app, session
 from flask_login import login_required, current_user
-from app.extensions import db
-from app.models import User, LoanType, LoanApplication, EMIHistory, FAQ, Notification, ContactMessage
-from app.forms import LoanApplicationForm, ContactForm
-from app.services import send_async_email, generate_calculator_pdf, generate_receipt_pdf
+from utils.extensions import db
+from models import User, LoanType, LoanApplication, EMIHistory, FAQ, Notification, ContactMessage
+from utils.forms import LoanApplicationForm, ContactForm
+from services import send_async_email, generate_calculator_pdf, generate_receipt_pdf
 from decimal import Decimal
 
 main_bp = Blueprint('main', __name__)

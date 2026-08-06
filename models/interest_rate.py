@@ -1,5 +1,5 @@
 from datetime import datetime
-from app.extensions import db
+from utils.extensions import db
 
 class InterestRate(db.Model):
     __tablename__ = 'interest_rates'

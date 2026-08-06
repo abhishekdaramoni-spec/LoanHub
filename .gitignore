@@ -1,23 +1,36 @@
-# Python Caching
+# Python Caches
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
+.ipynb_checkpoints/
 
-# Databases
-database/*.db
-database/loansphere.db
-
-# Flask upload files
-static/uploads/*
-!static/uploads/.gitkeep
-
-# Environments
-.env
-.venv
-env/
+# Virtual Environments
 venv/
+.venv/
+env/
 ENV/
+.env
+
+# Database Files
+*.db
+database/
+loansphere.db
+
+# IDEs & Editor configs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
 
 # OS Files
 .DS_Store
 Thumbs.db
+ehthumbs.db
+
+# Flask upload files
+static/uploads/*
+!static/uploads/.gitkeep
