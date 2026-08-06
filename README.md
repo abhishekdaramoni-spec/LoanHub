@@ -86,3 +86,14 @@ LoanSphere/
 ├── templates/             # HTML Templates
 └── static/                # CSS, JS, and UI Assets
 ```
+## 🌐 Live Demo
+
+Experience **LoanHub** live by visiting the deployed application:
+
+👉 **Live Website:** https://loanhub-7ees.onrender.com/
+
+### Available Pages
+- 🏠 Home: https://loanhub-7ees.onrender.com/
+- 💰 Loan Calculator: https://loanhub-7ees.onrender.com/calculator
+- 📞 Contact: https://loanhub-7ees.onrender.com/contact
+- ℹ️ About: https://loanhub-7ees.onrender.com/about
